@@ -14,11 +14,11 @@ import play.api.mvc._
 class HomeController @Inject()(cc: ControllerComponents) (implicit assetsFinder: AssetsFinder)
   extends AbstractController(cc) {
 
-  private final val filePath = "/data/dataset.csv"
+  private final val filePath = "/data/LoanStats_securev1_2017Q4.csv"
   def index = Action {
     val inputStream = this.getClass.getResourceAsStream(filePath)
     val reader = CSVReader.open(new InputStreamReader(inputStream))
-    val header = reader.allWithHeaders().head.keys
+    val header = reader.toStream.head
     Ok(s"Loaded file $filePath with header: [${header.mkString(", ")}]")
   }
 
