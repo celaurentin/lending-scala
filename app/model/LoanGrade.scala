@@ -5,7 +5,7 @@ import enumeratum._
 import scala.collection.immutable
 
 sealed trait LoanGrade extends EnumEntry
-object LoanGrade extends Enum[LoanGrade] {
+object LoanGrade extends Enum[LoanGrade] with PlayJsonEnum[LoanGrade] {
 
   override val values: immutable.IndexedSeq[LoanGrade] = findValues
 

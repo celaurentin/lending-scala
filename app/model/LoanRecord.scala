@@ -1,5 +1,8 @@
 package model
 
+import play.api.libs.json._
+
+
 case class LoanRecord(
     id: Long,
     amount: Int,
@@ -12,3 +15,8 @@ case class LoanRecord(
     purpose: LoanPurpose,
     ficoRange: FicoRange
 )
+
+object LoanRecord {
+
+  implicit val LoanRecordFormat: OWrites[LoanRecord] = Json.writes[LoanRecord]
+}

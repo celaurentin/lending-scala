@@ -6,7 +6,7 @@ import enumeratum._
 import scala.collection.immutable
 
 sealed abstract class LoanPurpose extends EnumEntry with Snakecase
-object LoanPurpose extends Enum[LoanPurpose] {
+object LoanPurpose extends Enum[LoanPurpose] with PlayJsonEnum[LoanPurpose] {
 
   override val values: immutable.IndexedSeq[LoanPurpose] = findValues
 
