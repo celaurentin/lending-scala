@@ -6,6 +6,7 @@ lazy val root = (project in file("."))
     scalaVersion := "2.12.9",
     libraryDependencies ++= Seq(
       guice,
+      "com.beachape" %% "enumeratum" % "1.7.0",
       "com.h2database" % "h2" % "1.4.199",
       "com.github.tototoshi" %% "scala-csv" % "1.3.5",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.0.0" % Test
@@ -13,6 +14,7 @@ lazy val root = (project in file("."))
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation",
-      "-Xfatal-warnings"
+      "-Xfatal-warnings",
+      "-language:higherKinds"
     )
   )
