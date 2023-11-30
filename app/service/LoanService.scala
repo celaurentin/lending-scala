@@ -24,7 +24,6 @@ class LoanServiceImpl extends LoanService {
       val inputStream = this.getClass.getResourceAsStream(filePath)
       val reader = CSVReader.open(new InputStreamReader(inputStream))
       loanRecords = reader.toStreamWithHeaders.map { row =>
-        println(row)
         LoanRecord(
           id = row("id").toLong,
           amount = row("loan_amnt").toInt,
