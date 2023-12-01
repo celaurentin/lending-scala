@@ -17,9 +17,8 @@ class HomeController @Inject() (cc: ControllerComponents, loanService: LoanServi
     implicit assetsFinder: AssetsFinder
 ) extends AbstractController(cc) {
 
-  def getLoanReport: Action[AnyContent] = Action { implicit request: Request[AnyContent] =>
-    // TODO: val queryParams = request.queryString
-    val results = loanService.getLoansReport(ReportType.Amount, ReportFilter.JobTitle)
+  def getLoanReport(reportType: String, reportFilter: String): Action[AnyContent] = Action {
+    val results = loanService.getLoansReport(ReportType.withName(reportType), ReportFilter.withName(reportFilter))
     Ok(Json.toJson(results))
   }
 
