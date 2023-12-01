@@ -1,7 +1,11 @@
 package service
 
 import java.io.InputStreamReader
+import javax.inject.Inject
 import javax.inject.Singleton
+
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
 import com.github.tototoshi.csv.CSVReader
 import model._
@@ -9,15 +13,15 @@ import service.LoanFields._
 
 trait LoanDataAccessService {
 
-  def getRecords(filePath: String): List[LoanRecord]
+  def getRecords(filePath: String): Future[List[LoanRecord]]
 }
 
 @Singleton
-class LoanDataAccessServiceImpl extends LoanDataAccessService {
+class LoanDataAccessServiceImpl @Inject() (implicit val ec: ExecutionContext) extends LoanDataAccessService {
 
   private var loanRecords: List[LoanRecord] = List.empty
 
-  override def getRecords(filePath: String): List[LoanRecord] = {
+  override def getRecords(filePath: String): Future[List[LoanRecord]] = Future {
     if (loanRecords.isEmpty) {
       val inputStream = this.getClass.getResourceAsStream(filePath)
       val reader      = CSVReader.open(new InputStreamReader(inputStream))
