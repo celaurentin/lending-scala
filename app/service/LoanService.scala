@@ -81,8 +81,8 @@ class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImp
       )
     }
     LoanReport(
-      title = "Total Loans by Grade",
-      xLabel = "Grades",
+      title = s"Total Loans by ${filter.entryName}",
+      xLabel = s"${filter.entryName}s",
       yLabel = "Total Loans - Millions",
       data = dataPoints
     )
@@ -96,8 +96,8 @@ class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImp
       )
     }
     LoanReport(
-      title = "Total Loans by Grade",
-      xLabel = "Grades",
+      title = s"Total Loans by ${filter.entryName}",
+      xLabel = s"${filter.entryName}s",
       yLabel = "Total Loans - Count",
       data = dataPoints
     )
