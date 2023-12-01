@@ -1,11 +1,7 @@
 package controllers
 
 import javax.inject._
-
 import scala.concurrent.ExecutionContext
-
-import model.ReportFilter
-import model.ReportType
 import play.api.libs.json.Json
 import play.api.mvc._
 import service.LoanServiceImpl
@@ -23,8 +19,8 @@ class LendingController @Inject() (cc: ControllerComponents, loanService: LoanSe
   def getLoanReport(reportType: String, reportFilter: String): Action[AnyContent] = Action.async {
     loanService
       .getLoansReport(
-        ReportType.withNameInsensitiveOption(reportType),
-        ReportFilter.withNameInsensitiveOption(reportFilter)
+        reportType,
+        reportFilter
       )
       .map(r => Ok(Json.toJson(r)))
   }
