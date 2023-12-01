@@ -8,7 +8,6 @@ import scala.concurrent.Future
 import com.google.inject.Singleton
 import controllers.model.DataPoint
 import controllers.model.LoanReport
-import model.LoanGrade
 import model.LoanRecord
 import model.ReportFilter
 import model.ReportType
@@ -47,19 +46,37 @@ class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImp
 
   }.flatten
 
+  private def getGroupingKey[T](record: LoanRecord, filter: ReportFilter) =
+    filter match {
+      case ReportFilter.JobTitle => record.jobTitle
+      case ReportFilter.State    => record.state
+      case ReportFilter.Grade    => record.grade
+      case ReportFilter.Purpose  => record.purpose
+    }
+
   private def totalAmount(records: List[LoanRecord]): Int =
     records.foldLeft(0)((acumm, loan) => acumm + loan.amount)
 
-  private def amountByGrade(records: List[LoanRecord]): List[(LoanGrade, Int)] =
+  private def amountByFilter(records: List[LoanRecord], filter: ReportFilter): List[(Object, Int)] =
     records
-      .groupBy(_.grade)
-      .map(byGrade => (byGrade._1, totalAmount(byGrade._2)))
+      .groupBy(getGroupingKey(_, filter))
+      .map(byFilter => (byFilter._1, totalAmount(byFilter._2)))
       .toList
-      .sortBy(_._2).reverse
+      .sortBy(_._2)
+      .reverse
+
+  private def countByFilter(records: List[LoanRecord], filter: ReportFilter): List[(Object, Int)] =
+    records
+      .groupBy(getGroupingKey(_, filter))
+      .map(byFilter => (byFilter._1, byFilter._2.size))
+      .toList
+      .sortBy(_._2)
+      .reverse
+
   private def buildDollarReport(filter: ReportFilter, data: List[LoanRecord]): LoanReport = {
-    val dataPoints = amountByGrade(data).map { dp =>
+    val dataPoints = amountByFilter(data, filter).map { dp =>
       DataPoint(
-        label = dp._1.entryName,
+        label = dp._1.toString,
         value = dp._2.toString
       )
     }
@@ -71,6 +88,19 @@ class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImp
     )
   }
 
-  private def buildCountReport(filter: ReportFilter, data: List[LoanRecord]): LoanReport = ???
+  private def buildCountReport(filter: ReportFilter, data: List[LoanRecord]): LoanReport = {
+    val dataPoints = countByFilter(data, filter).map { dp =>
+      DataPoint(
+        label = dp._1.toString,
+        value = dp._2.toString
+      )
+    }
+    LoanReport(
+      title = "Total Loans by Grade",
+      xLabel = "Grades",
+      yLabel = "Total Loans - Count",
+      data = dataPoints
+    )
+  }
 
 }
