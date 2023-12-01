@@ -18,7 +18,7 @@ class HomeController @Inject() (cc: ControllerComponents, loanService: LoanServi
 ) extends AbstractController(cc) {
 
   def getLoanReport(reportType: String, reportFilter: String): Action[AnyContent] = Action {
-    val results = loanService.getLoansReport(ReportType.withName(reportType), ReportFilter.withName(reportFilter))
+    val results = loanService.getLoansReport(ReportType.withNameInsensitiveOption(reportType), ReportFilter.withNameInsensitiveOption(reportFilter))
     Ok(Json.toJson(results))
   }
 

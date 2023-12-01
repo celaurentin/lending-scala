@@ -1,43 +1,28 @@
 package service
 
-import com.github.tototoshi.csv.CSVReader
-import com.google.inject.Singleton
-import model.{FicoRange, ReportFilter, LoanGrade, LoanPurpose, LoanRecord, LoanStatus, ReportType}
+import javax.inject.Inject
 
-import java.io.InputStreamReader
+import com.google.inject.Singleton
+import model.LoanRecord
+import model.ReportFilter
+import model.ReportType
 
 trait LoanService {
-  def getLoansReport(reportType: ReportType, filter: ReportFilter): List[LoanRecord]
+  def getLoansReport(reportType: Option[ReportType], reportFilter: Option[ReportFilter]): List[LoanRecord]
 }
 
 @Singleton
-class LoanServiceImpl extends LoanService {
+class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImpl) extends LoanService {
 
-  final val filePath = "/data/LoanStats_securev1_2017Q4.csv"
-  private var loanRecords: List[LoanRecord] = List.empty
+  final val filePath            = "/data/LoanStats_securev1_2017Q4.csv"
+  final val defaultReportType   = ReportType.Amount
+  final val defaultReportFilter = ReportFilter.Grade
 
-  override def getLoansReport(reportType: ReportType, filter: ReportFilter): List[LoanRecord] = getRecords
+  override def getLoansReport(reportType: Option[ReportType], reportFilter: Option[ReportFilter]): List[LoanRecord] = {
 
-
-  private def getRecords: List[LoanRecord] = {
-    if (loanRecords.isEmpty) {
-      val inputStream = this.getClass.getResourceAsStream(filePath)
-      val reader = CSVReader.open(new InputStreamReader(inputStream))
-      loanRecords = reader.toStreamWithHeaders.map { row =>
-        LoanRecord(
-          id = row("id").toLong,
-          amount = row("loan_amnt").toInt,
-          term = row("term"),
-          grade = LoanGrade.withName(row("grade")),
-          jobTitle = row("emp_title"),
-          issueDate = row("issue_d"),
-          status = LoanStatus.withName(row("loan_status")),
-          state = row("addr_state"),
-          purpose = LoanPurpose.withName(row("purpose")),
-          ficoRange = FicoRange(row("fico_range_low").toInt, row("fico_range_high").toInt)
-        )
-      }.collect({ case lr: LoanRecord => lr }).toList
-    }
-    loanRecords
+    println(reportType.getOrElse(defaultReportType))
+    println(reportFilter.getOrElse(defaultReportFilter))
+    val result = loanDataAccessService.getRecords(filePath)
+    result
   }
 }
