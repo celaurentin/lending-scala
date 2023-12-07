@@ -38,11 +38,11 @@ class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImp
     if (_type == ReportType.Amount)
       loanDataAccessService
         .getRecords(filePath)
-        .map(data => buildDollarReport(filter, data))
+        .map(data => buildReport(filter, totalAmount, data, "Millions"))
     else
       loanDataAccessService
         .getRecords(filePath)
-        .map(data => buildCountReport(filter, data))
+        .map(data => buildReport(filter, totalCount, data, "Count"))
 
   }.flatten
 
@@ -57,24 +57,18 @@ class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImp
   private def totalAmount(records: List[LoanRecord]): Int =
     records.foldLeft(0)((acumm, loan) => acumm + loan.amount)
 
-  private def amountByFilter(records: List[LoanRecord], filter: ReportFilter): List[(Object, Int)] =
+  private def totalCount(records: List[LoanRecord]): Int = records.size
+
+  private def totalByFilter(records: List[LoanRecord], f: List[LoanRecord] => Int, filter: ReportFilter): List[(Object, Int)] =
     records
       .groupBy(getGroupingKey(_, filter))
-      .map(byFilter => (byFilter._1, totalAmount(byFilter._2)))
+      .map(byFilter => (byFilter._1, f(byFilter._2)))
       .toList
       .sortBy(_._2)
       .reverse
 
-  private def countByFilter(records: List[LoanRecord], filter: ReportFilter): List[(Object, Int)] =
-    records
-      .groupBy(getGroupingKey(_, filter))
-      .map(byFilter => (byFilter._1, byFilter._2.size))
-      .toList
-      .sortBy(_._2)
-      .reverse
-
-  private def buildDollarReport(filter: ReportFilter, data: List[LoanRecord]): LoanReport = {
-    val dataPoints = amountByFilter(data, filter).map { dp =>
+  private def buildReport(filter: ReportFilter, f: List[LoanRecord] => Int, data: List[LoanRecord], yLabel: String): LoanReport = {
+    val dataPoints = totalByFilter(data, f, filter).map { dp =>
       DataPoint(
         label = dp._1.toString,
         value = dp._2.toString
@@ -83,24 +77,10 @@ class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImp
     LoanReport(
       title = s"Total Loans by ${filter.entryName}",
       xLabel = s"${filter.entryName}s",
-      yLabel = "Total Loans - Millions",
+      yLabel = s"Total Loans - $yLabel",
       data = dataPoints
     )
   }
 
-  private def buildCountReport(filter: ReportFilter, data: List[LoanRecord]): LoanReport = {
-    val dataPoints = countByFilter(data, filter).map { dp =>
-      DataPoint(
-        label = dp._1.toString,
-        value = dp._2.toString
-      )
-    }
-    LoanReport(
-      title = s"Total Loans by ${filter.entryName}",
-      xLabel = s"${filter.entryName}s",
-      yLabel = "Total Loans - Count",
-      data = dataPoints
-    )
-  }
 
 }
