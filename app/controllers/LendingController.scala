@@ -16,11 +16,11 @@ class LendingController @Inject() (cc: ControllerComponents, loanService: LoanSe
     implicit val ec: ExecutionContext
 ) extends AbstractController(cc) {
 
-  def getLoanReport(reportType: String, reportFilter: String): Action[AnyContent] = Action.async {
+  def getLoanReport(reportType: String, groupingKey: String): Action[AnyContent] = Action.async {
     loanService
       .getLoansReport(
         reportType,
-        reportFilter
+        groupingKey
       )
       .map(r => Ok(Json.toJson(r)))
   }

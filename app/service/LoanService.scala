@@ -15,7 +15,7 @@ import model.ReportType
 trait LoanService {
   def getLoansReport(
       reportType: String,
-      reportFilter: String
+      groupingKey: String
   ): Future[LoanReport]
 }
 
@@ -29,25 +29,25 @@ class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImp
 
   override def getLoansReport(
       reportType: String,
-      reportFilter: String
+      groupingKey: String
   ): Future[LoanReport] = Future {
 
-    val _type  = ReportType.withNameInsensitiveOption(reportType).getOrElse(defaultReportType)
-    val filter = ReportFilter.withNameInsensitiveOption(reportFilter).getOrElse(defaultReportFilter)
+    val _type        = ReportType.withNameInsensitiveOption(reportType).getOrElse(defaultReportType)
+    val _groupingKey = ReportFilter.withNameInsensitiveOption(groupingKey).getOrElse(defaultReportFilter)
 
     if (_type == ReportType.Amount)
       loanDataAccessService
         .getRecords(filePath)
-        .map(data => buildReport(filter, totalAmount, data, "Millions"))
+        .map(data => buildReport(_groupingKey, totalAmount, data, "Millions"))
     else
       loanDataAccessService
         .getRecords(filePath)
-        .map(data => buildReport(filter, totalCount, data, "Count"))
+        .map(data => buildReport(_groupingKey, totalCount, data, "Count"))
 
   }.flatten
 
-  private def getGroupingKey[T](record: LoanRecord, filter: ReportFilter) =
-    filter match {
+  private def getGroupingKey(record: LoanRecord, groupingKey: ReportFilter) =
+    groupingKey match {
       case ReportFilter.JobTitle => record.jobTitle
       case ReportFilter.State    => record.state
       case ReportFilter.Grade    => record.grade
@@ -59,28 +59,39 @@ class LoanServiceImpl @Inject() (loanDataAccessService: LoanDataAccessServiceImp
 
   private def totalCount(records: List[LoanRecord]): Int = records.size
 
-  private def totalByFilter(records: List[LoanRecord], f: List[LoanRecord] => Int, filter: ReportFilter): List[(Object, Int)] =
+  private def totalByFilter(
+      records: List[LoanRecord],
+      f: List[LoanRecord] => Int,
+      groupingKey: ReportFilter
+  ): List[(Object, Int)] =
     records
-      .groupBy(getGroupingKey(_, filter))
-      .map(byFilter => (byFilter._1, f(byFilter._2)))
+      .groupBy(getGroupingKey(_, groupingKey))
+      .map {
+        case (groupKeyValue, data) => (groupKeyValue, f(data))
+      }
       .toList
       .sortBy(_._2)
       .reverse
 
-  private def buildReport(filter: ReportFilter, f: List[LoanRecord] => Int, data: List[LoanRecord], yLabel: String): LoanReport = {
-    val dataPoints = totalByFilter(data, f, filter).map { dp =>
-      DataPoint(
-        label = dp._1.toString,
-        value = dp._2.toString
-      )
+  private def buildReport(
+      groupingKey: ReportFilter,
+      f: List[LoanRecord] => Int,
+      data: List[LoanRecord],
+      yLabel: String
+  ): LoanReport = {
+    val dataPoints = totalByFilter(data, f, groupingKey).map {
+      case (label, value) =>
+        DataPoint(
+          label = label.toString,
+          value = value.toString
+        )
     }
     LoanReport(
-      title = s"Total Loans by ${filter.entryName}",
-      xLabel = s"${filter.entryName}s",
+      title = s"Total Loans by ${groupingKey.entryName}",
+      xLabel = s"${groupingKey.entryName}s",
       yLabel = s"Total Loans - $yLabel",
       data = dataPoints
     )
   }
-
 
 }

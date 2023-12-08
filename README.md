@@ -8,7 +8,7 @@ Run this using [sbt](http://www.scala-sbt.org/).
 sbt run
 ```
 
-And then go <http://localhost:9000/loan/report?reportType=Amount&reportFilter=Grade> to see one of the available data views.
+And then go <http://localhost:9000/loan/report?reportType=Amount&groupingKey=Grade> to see one of the available data views.
 
 ## Route and parameters
 
@@ -17,7 +17,7 @@ And then go <http://localhost:9000/loan/report?reportType=Amount&reportFilter=Gr
   * reportType: Selector between dollar amount vs total count reports, valid values:
     * Amount
     * Count
-  * reportFilter: Selector between the available grouping dimension to display the data, valid values:
+  * groupingKey: Selector between the available grouping dimensions to display the data, valid values:
     * Grade
     * State
     * Purpose

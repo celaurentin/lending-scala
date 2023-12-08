@@ -25,7 +25,7 @@ class FunctionalSpec extends PlaySpec with GuiceOneAppPerSuite {
 
   "LendingController" should {
     "render report data" in {
-      val report = route(app, FakeRequest(GET, "/loan/report?reportType=Amount&reportFilter=Grade")).get
+      val report = route(app, FakeRequest(GET, "/loan/report?reportType=Amount&groupingKey=Grade")).get
 
       status(report) mustBe Status.OK
       contentType(report) mustBe Some("application/json")

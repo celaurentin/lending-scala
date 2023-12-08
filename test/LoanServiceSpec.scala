@@ -28,7 +28,7 @@ class LoanServiceSpec extends AnyFunSpec with Matchers with MockitoSugar with Fi
         when(loanDataAccessService.getRecords(any())).thenReturn(Future.successful(allRecords))
         val result = loanService.getLoansReport(
           reportType = ReportType.Amount.entryName,
-          reportFilter = ReportFilter.Grade.entryName
+          groupingKey = ReportFilter.Grade.entryName
         )
         result.futureValue shouldBe loanReport1
       }
@@ -36,7 +36,7 @@ class LoanServiceSpec extends AnyFunSpec with Matchers with MockitoSugar with Fi
         when(loanDataAccessService.getRecords(any())).thenReturn(Future.successful(allRecords))
         val result = loanService.getLoansReport(
           reportType = ReportType.Amount.entryName,
-          reportFilter = ReportFilter.State.entryName
+          groupingKey = ReportFilter.State.entryName
         )
         result.futureValue shouldBe loanReport2
       }
@@ -47,7 +47,7 @@ class LoanServiceSpec extends AnyFunSpec with Matchers with MockitoSugar with Fi
         when(loanDataAccessService.getRecords(any())).thenReturn(Future.successful(allRecords))
         val result = loanService.getLoansReport(
           reportType = ReportType.Count.entryName,
-          reportFilter = ReportFilter.Grade.entryName
+          groupingKey = ReportFilter.Grade.entryName
         )
         result.futureValue shouldBe loanReport3
       }
@@ -55,7 +55,7 @@ class LoanServiceSpec extends AnyFunSpec with Matchers with MockitoSugar with Fi
         when(loanDataAccessService.getRecords(any())).thenReturn(Future.successful(allRecords))
         val result = loanService.getLoansReport(
           reportType = ReportType.Count.entryName,
-          reportFilter = ReportFilter.State.entryName
+          groupingKey = ReportFilter.State.entryName
         )
         result.futureValue shouldBe loanReport4
       }
